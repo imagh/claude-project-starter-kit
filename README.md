@@ -31,19 +31,46 @@ wires up the guardrails.
 - **Scaffolding**: a dated plan template, a PR template, a `.claude/settings.json` guardrail
   set (deny secret/protected paths; block agent merges), and a pre-commit config template.
 
-## Quick start
+## Usage / setup
+
+**1. Get the kit's files into your target repo's root.** Any of:
 
 ```bash
-# 1. Copy this kit's contents into your target repo's root (see SETUP.md for the file map).
-# 2. Open Claude Code in that repo and say:
-#    "Instantiate the starter kit — follow SETUP.md and interview me for the placeholders."
+# a) degit (no git history) — recommended
+npx degit imagh/claude-project-starter-kit .starter-kit && cp -R .starter-kit/. . && rm -rf .starter-kit
+
+# b) clone then copy the contents in
+git clone https://github.com/imagh/claude-project-starter-kit /tmp/cpsk
+cp -R /tmp/cpsk/. .        # copies CLAUDE.md, .claude/, docs/, .github/, .pre-commit-config.yaml, etc.
+
+# c) download the v1.0.0 archive from the Releases page and unzip into the repo root
 ```
 
-Claude Code will read [`SETUP.md`](SETUP.md) and run it as an **interview** — inventorying your
-repo, then **asking you** (with options + a recommended default) how to adapt the opinionated
-defaults to your project's structure, stack, and conventions — before it fills every
-`{{PLACEHOLDER}}`, removes the guidance blocks, wires the guardrails, and verifies. It won't
-silently impose the defaults, and it merges with (never clobbers) anything you already have.
+Copy everything **except** `README.md` and `SETUP.md` into the target — those two describe the
+kit, not your project. (`SETUP.md` is worth keeping open during setup; delete it after.)
+
+**2. Instantiate it — open Claude Code in the repo and say:**
+
+> "Instantiate the starter kit — follow `SETUP.md` and interview me."
+
+**3. Answer the interview.** Claude Code reads [`SETUP.md`](SETUP.md) and runs it as an
+**interview** — inventorying your repo, then **asking you** (with options + a recommended
+default) how to adapt the opinionated defaults to your project's structure, stack, and
+conventions — before it fills every `{{PLACEHOLDER}}`, removes the guidance blocks, wires the
+guardrails, creates the doc dirs, and verifies. It won't silently impose the defaults, and it
+merges with (never clobbers) anything you already have.
+
+**4. Verify & commit.** It checks no placeholders remain, the agents/commands load, and
+smoke-tests `/architect`, then shows you the diff. Land it as its own small commit
+(`chore: adopt development constitution + role agents`).
+
+**5. Use it.** `/architect <task>` → plan · `/dev <plan/task>` → build under TDD, then
+auto-review · `/review-changes` → review the current diff. (If a slash command isn't available
+in your Claude Code version, invoke the agent by name — e.g. "use the architect subagent".)
+
+> **Note:** this is a guided adaptation, not a blind drop-in — expect the short interview above,
+> especially on an existing repo. See [`SETUP.md`](SETUP.md) for the full step-by-step and the
+> placeholder reference.
 
 ## Files
 
@@ -84,3 +111,7 @@ docs/
   existing repo; expect a short adaptation pass, not a blind copy.
 - **Provenance.** This kit generalizes a working setup; nothing in it is tied to the origin
   project once the placeholders are filled.
+
+## License
+
+MIT — see [`LICENSE`](LICENSE). Use it, fork it, adapt it freely.
