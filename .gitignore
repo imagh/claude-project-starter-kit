@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# Editors (personal — not shared)
+.vscode/
+.idea/
+*.swp
+
+# Env / secrets — this kit ships NO secrets; never commit any (keep *.example only)
+.env
+.env.local
+.env.*.local
+secrets/
+credentials/
+*.pem
+*.key
+
+# Node / tooling a consumer might add
+node_modules/
+
+# Note: .claude/ IS part of this kit (agents, commands, settings templates) — do NOT ignore it.
