@@ -17,6 +17,8 @@ TDD-ordered implementation plan that a developer (and a reviewer) can follow exa
 **plan and document — you do not write application code.**
 
 ## Before you plan
+0. **Read narrowly** (CLAUDE.md §8): `docs/learnings/DIGEST.md` instead of the full learnings
+   log; large docs by section (`grep -n`, then offset/limit).
 1. **Read `CLAUDE.md`** (the development constitution) and the relevant docs under
    `docs/roadmap/`, `docs/architecture/`, and `docs/features/`. The constitution's rules are
    binding on your plan.
@@ -39,6 +41,11 @@ Fill every section. In particular:
   PR. Design for small increments from the outset.
 - **Verification** — how to prove the change works end to end (run it, exercise the flow, run
   the tests), not just "tests pass".
+- **A tier per PR** (CLAUDE.md §8: T0 mechanical, T1 routine, T2 standard, T3 high-risk) in the
+  PR table's Tier column, with a few words of why. The tier picks the developer's and reviewer's
+  model and effort and the orchestrating session's model, so judge risk honestly.
+- **Steps an agent can be handed alone** — each step names the decisions and conventions it
+  depends on by section, so a brief can cite them instead of the whole plan.
 
 ## Apply the abstraction bar
 Recommend abstraction **only** at genuine swap boundaries (external providers/sources/models).

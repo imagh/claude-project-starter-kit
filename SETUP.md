@@ -51,8 +51,12 @@ defaults, don't interrogate). Everything here maps to a placeholder in Step 2.
   domain demands (e.g. for fintech: risk limits & audit trails; for healthcare: PII handling).
   If none, say so and you'll trim that rule (see Step 3).
 - **Review/merge humans** — who approves and merges PRs.
-- **Model policy** — keep the default (premium model plans+reviews, Sonnet builds, all `xhigh`)
-  unless the user wants a change.
+- **Model policy and tiers** — keep the default (a tier per PR: Sonnet builds routine and standard
+  work, the premium model plans, reviews standard work and builds high-risk work) unless the user
+  wants a change. Ask which kinds of work are **high-risk** (T3) and which **paths** bump a PR up
+  a tier (default: auth, payments, schema migrations, crypto, concurrency).
+- **Slow or hang-prone commands** — what must run in the background (default: the full test
+  suite); this fills the usage guard's `background_only` list (Step 4).
 
 ## Step 1.5 — Greenfield vs. existing project (adapt, don't impose)
 
@@ -125,8 +129,8 @@ default, then apply their answer. After inventorying the repo, ask (batched):
 
 ## Step 2 — Placeholder reference (fill every one)
 
-Replace across `CLAUDE.md` and the three agent files. Grep the tree for `{{` afterward to
-prove none remain.
+Replace across `CLAUDE.md`, the three agent files, and `docs/learnings/` (`README.md` and
+`DIGEST.md`). Grep the tree for `{{` afterward to prove none remain.
 
 | Placeholder | Meaning | Example |
 |---|---|---|
@@ -150,6 +154,8 @@ prove none remain.
 | `{{DOMAIN_SAFETY_RULE}}` | The domain's hardcoded invariants (§3) — or remove per Step 3 | `risk controls & 5-yr audit` |
 | `{{REVIEW_HUMANS}}` | Who reviews/merges PRs | `Akash / Tandrima` |
 | `{{SESSION_MODEL_NOTE}}` | Premium model the session runs (or leave "the session model") | `Opus-tier` |
+| `{{HIGH_RISK_AREAS}}` | Kinds of work that are T3 (§8 tier table): the developer and reviewer run on the premium model | `auth, payments, schema migrations, concurrency, crypto` |
+| `{{RISKY_PATHS}}` | Paths whose change bumps a PR up a tier (§8) | `` `src/auth/`, `migrations/`, the deploy config `` |
 
 ## Step 3 — Adapt the domain-specific rule
 
@@ -175,9 +181,18 @@ Everything else in the constitution is universal — keep it.
 4. **Branch protection** (optional, GitHub) — require ≥1 approving review on the default branch
    so the "humans merge, not agents" rule is enforced server-side too. Note it in the repo's
    own README.
-5. **Create the doc dirs** referenced by the constitution's taxonomy (§5): `docs/plans/` (keep
+5. **Usage guard** (`tools/agent/`, CLAUDE.md §8). `settings.json` wires `tools/agent/guard.py`
+   as a PreToolUse hook for `Read` and `Bash`. It needs `python3` (3.9+) on the PATH.
+   - Fill `background_only` in `tools/agent/guard.json` with regexes for the project's slow or
+     hang-prone commands, which then must run in the background. Examples: the full test suite,
+     an end-to-end suite, a slow build.
+   - Ask the user: "Which commands take more than a minute or can hang?" The default is the
+     full-suite command from `{{TEST_FRAMEWORK}}`.
+   - Leave the list empty to enforce only the big-file rule. Keep the guard's own tests in the
+     pre-push hooks.
+6. **Create the doc dirs** referenced by the constitution's taxonomy (§5): `docs/plans/` (keep
    `_TEMPLATE.md`), `docs/features/`, `docs/architecture/` (with `code-structure.md`),
-   `docs/learnings/` (with `README.md`), plus `docs/product/` (the spec/PRD, if any) and
+   `docs/learnings/` (with `README.md` and `DIGEST.md`), plus `docs/product/` (the spec/PRD, if any) and
    `docs/roadmap/` (only if the build is staged). Remove the `docs/product/` and `docs/roadmap/`
    links at the top of `CLAUDE.md` if those don't apply to this project.
 
@@ -190,8 +205,12 @@ Everything else in the constitution is universal — keep it.
 - **Agents load:** the three agents appear in Claude Code's agent list with the right
   `model`/`effort` (architect & code-reviewer `inherit`/`xhigh`; senior-full-stack-dev
   `sonnet`/`xhigh`).
-- **Commands load:** `/architect`, `/dev`, and `/review-changes` appear in the slash-command
-  list (they come from `.claude/commands/`, not from the agents).
+- **Commands load:** `/architect`, `/dev`, `/review-changes` and `/orchestrate-pr` appear in the
+  slash-command list (they come from `.claude/commands/`, not from the agents).
+- **The guard works:** `python3 -I -m unittest discover -s tools/agent` passes, and
+  `echo '{"tool_name":"Read","tool_input":{"file_path":"<a file over 48 KB>"}}' | python3 -I tools/agent/guard.py`
+  exits 2 with a reason. If `background_only` is filled, a listed command in the foreground
+  exits 2 as well.
 - **Smoke test the loop:** run `/architect` on a tiny first task and confirm it writes a plan to
   `docs/plans/` following `_TEMPLATE.md` (including the PR-breakdown section).
 

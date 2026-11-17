@@ -273,7 +273,7 @@ A unit of work is done only when **all** of these hold:
 - [ ] The `code-reviewer` report was produced and its blockers/required actions resolved.
 - [ ] The PR follows `.github/pull_request_template.md` with every checklist item complete.
 
-## 8. Model policy for role agents
+## 8. Model policy and usage budget
 
 The two **reasoning-heavy** roles ride the session's model; the **implementer** steps down to a
 cheaper model that still thinks hard. This keeps plans thorough and review a strong safety net,
@@ -292,11 +292,40 @@ bracket, plus strict TDD, is the guard against hallucination/rework.
   detailed, TDD-ordered plan (faithful execution, not open design), so a strong Sonnet at
   extra-high effort is sufficient — and materially cheaper per token than the session model,
   applied to the biggest consumer.
-- **Escape hatch** — for a genuinely hard step (a novel pattern, tricky concurrency, a subtle
-  algorithm), the spawner may bump the developer to `inherit` for that run; note it when doing so.
+- **Per-PR tier** — the frontmatter above is the default; the spawner overrides `model`/`effort`
+  per run from the PR's tier (below).
 - A user's explicit model choice on any invocation **always wins**.
 
-Rationale in one line: **premium model plans → Sonnet builds → premium model reviews.**
+**Tiers: the model follows the work.** The architect gives every PR a tier in the plan's PR table;
+whoever orchestrates the PR applies it.
+
+| Tier | Signals | Developer | Review | Orchestrating session |
+|---|---|---|---|---|
+| **T0** mechanical | docs only, generated files, renames, branch merges | none: the orchestrator does it | orchestrator, briefly | Sonnet-tier |
+| **T1** routine | follows an existing pattern closely | `senior-full-stack-dev`, `sonnet`, `medium` | orchestrator, or `code-reviewer` on `sonnet` | Sonnet-tier |
+| **T2** standard | new shared component, untrusted input, accessibility-heavy, tricky tests | `senior-full-stack-dev`, `sonnet`, `xhigh` | `code-reviewer` (`inherit`), or the orchestrator with the reviewer's recurring-findings list | either |
+| **T3** high-risk | {{HIGH_RISK_AREAS}} | `senior-full-stack-dev`, `inherit`, `xhigh` | `code-reviewer`, `inherit`, `xhigh` | premium |
+
+The **architect** always runs at its pinned premium setting.
+
+**Adjusting a tier:**
+- **Bump up by paths:** a diff that touches {{RISKY_PATHS}} moves up a tier, whatever the plan says.
+- **Escalate on failure:** if a Sonnet developer misses the same review item twice, or stalls, the rest of that step runs on `inherit`.
+- **Step down:** a T2 step that turns out to be plain wiring may drop to `medium`.
+- Say so whenever you adjust a tier.
+- The orchestrating session's model is the user's choice at session start, so the next PR's tier is announced at the end of the previous session.
+
+**Usage budget (every session and agent).** Measured on the origin project: most of a PR's usage was reading, then re-sending what was read. Every tool call re-sends the agent's whole context, so a fix round on an agent that has already read 100k+ tokens costs about as much as the build.
+- **Read narrowly.** Read `docs/learnings/DIGEST.md`, not the full learnings log. Read large plans and READMEs by section (`grep -n`, then offset/limit). `tools/agent/guard.py`, a PreToolUse hook, refuses whole reads over 48 KB.
+- **Brief by section.** A brief cites the plan step and decisions by section, not whole files; the agent files already carry the standing rules, so a brief never repeats them.
+- **Get the first hand-back clean.** The developer runs the self-review list in its agent file before reporting. The list is built from past review findings; add to it whenever a review finding repeats.
+- **Scale mutation evidence to risk** (`senior-full-stack-dev.md`).
+- **Long or hang-prone commands run in the background** (the guard's `background_only` list enforces it).
+- **One session per PR.** Open the PR, report, and end the session, so no context is carried between PRs. `/orchestrate-pr` runs this loop.
+- **Delegate bulk reading.** When one-off bulk reading is needed (a long log or file), hand it to a Sonnet-tier agent and keep the orchestrating session's context small.
+
+Rationale in one line: **premium model plans and takes the risky work → Sonnet builds the rest →
+review matches the risk, and every agent reads only what it needs.**
 
 ## 9. Conventions
 

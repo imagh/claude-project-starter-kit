@@ -11,9 +11,11 @@ the two subagents (do not implement or review yourself):
 2. When it finishes, **automatically** delegate to the **`code-reviewer`** subagent to review
    the resulting diff, and surface its compact report to the user.
 
-Per CLAUDE.md §8, the developer runs on its pinned model (Sonnet · `xhigh`) and the reviewer on
-the session model; a user's explicit model choice wins, and you may use the escape hatch (run
-the developer on the session model) for a genuinely hard step — say so if you do. Do not
-commit, push, or merge unless the user asks; keep commits small and single-purpose (§6).
+Per CLAUDE.md §8, the developer and reviewer run on the model and effort of the work's tier (the
+plan's PR table names it; T1 `sonnet`/`medium`, T2 `sonnet`/`xhigh` with an `inherit` reviewer,
+T3 `inherit` for both); a user's explicit model choice wins, and you escalate the developer to
+`inherit` if it misses the same review item twice — say so if you do. Do not commit, push, or
+merge unless the user asks; keep commits small and single-purpose (§6). To run a whole PR and end
+the session after it, use `/orchestrate-pr`.
 
 $ARGUMENTS

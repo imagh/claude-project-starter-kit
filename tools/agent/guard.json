@@ -1,0 +1,6 @@
+{
+  "max_whole_read_bytes": 48000,
+  "exempt_suffixes": [".png", ".jpg", ".jpeg", ".gif", ".webp", ".pdf"],
+  "background_only": [],
+  "background_hint": ""
+}
