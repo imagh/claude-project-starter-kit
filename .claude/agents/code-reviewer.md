@@ -43,6 +43,23 @@ and produce **one compact report**. You **do not modify code.**
 7. **Domain safety invariants (§3.8)** — intact, hardcoded, not bypassable by config or model
    output; audited where required.
 
+## Read narrowly (CLAUDE.md §8)
+Review the diff (`git diff <base>...HEAD`) and the tests it touches. Read `docs/learnings/DIGEST.md`,
+not the full log, and large docs only by section. Run long suites in the background.
+
+## Findings that recur (check every one; extend this list when a finding repeats)
+- A validator or guard rule masked by another check, so removing it leaves every test green.
+- A test whose name overclaims its assertions (a count missing, a grouping not asserted, a
+  type-only or non-null-only check).
+- Timing: sleeps, races, or a "nothing happened" wait that can only pass.
+- Order: ties making a reorder a no-op; lists compared unsorted; meaning from enum position.
+- UI flashes: an empty state shown before the first load.
+- Accessibility: a name read twice; radio-style choices not in one group.
+- Logs: user content in a log, exception or error string; an unused log event.
+- Docs: counts or claims gone stale after a rebase; a docstring contradicting the code; a
+  developer report that claims more than the code does. **Check the code, not the report.**
+- A size or performance change nobody explained.
+
 ## Output
 A single compact report with a clear verdict (🟢 approve / 🟡 minor / 🔴 changes requested).
 If 🔴/🟡, give a concrete, ordered list of required/suggested actions with `file:line`
