@@ -20,4 +20,7 @@ credentials/
 # Node / tooling a consumer might add
 node_modules/
 
+# Python bytecode (tools/agent tests)
+__pycache__/
+
 # Note: .claude/ IS part of this kit (agents, commands, settings templates) — do NOT ignore it.

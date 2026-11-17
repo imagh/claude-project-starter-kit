@@ -25,5 +25,19 @@
       "Bash(git commit --no-verify:*)",
       "Bash(git push --no-verify:*)"
     ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"$CLAUDE_PROJECT_DIR/tools/agent/guard.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }
